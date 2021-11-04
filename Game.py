@@ -3,12 +3,14 @@ from typing import ValuesView
 import pygame
 from pygame import key
 from pygame.constants import K_SPACE
+import threading
+import time
 
 pygame.init()
 clock = pygame.time.Clock()
 
-winWidth = 1360
-winHeight = 720
+winWidth = 1200
+winHeight = 600
 
 win = pygame.display.set_mode((winWidth, winHeight))
 pygame.display.set_caption("Sam's")
@@ -72,6 +74,15 @@ class character():
         
         return imgs
 
+    def punch(self):
+        left_punch = pygame.image.load('Hero/Images/HeroLeftPunch.png')
+        left_punch = pygame.transform.scale(left_punch, (self.w, self.h))
+        right_punch = pygame.image.load('Hero/Images/HeroRightPunch.png')
+        right_punch = pygame.transform.scale(right_punch, (self.w, self.h))
+
+        imgs = [left_punch, right_punch]
+        return imgs
+
 
 def char_values():
     walk_count = 0
@@ -88,13 +99,14 @@ def values():
     y_change = 0
     default_jump = 10
     jump_count = default_jump
-    w = winWidth/5
-    h = winWidth/5
+    w = winWidth/6
+    h = winWidth/6
     x = winWidth  - w
     y = winHeight - h
     v = 10
     is_jump = False
-    return (x_change, y_change, default_jump, jump_count, w, h, x, y, v, is_jump)
+    is_punch = False
+    return (x_change, y_change, default_jump, jump_count, w, h, x, y, v, is_jump, is_punch)
 
 
     
@@ -102,11 +114,14 @@ def values():
 
 def main():
     
-    x_change, y_change, jump, jump_count, w, h, x, y, v, is_jump = values()
+    x_change, y_change, jump, jump_count, w, h, x, y, v, is_jump, is_punch = values()
 
     char1 = character(x, y, w, h)
     walk_left = char1.walk_left()
     walk_right = char1.walk_right()
+    punch = char1.punch()
+    right_punch = punch[1]
+    left_punch = punch[0]
     walk_count, left, right = char_values()
 
     run = True
@@ -118,12 +133,6 @@ def main():
         fps30.set_fps()
         win.fill((255,255,255))
         rect = shapes(x, y, w, h)
-        
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            
         
         keys = pygame.key.get_pressed()
 
@@ -153,14 +162,36 @@ def main():
         else:
             x_change = 0
 
-        if keys[pygame.K_SPACE]:
-            is_jump = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    is_jump = True
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    is_punch = True
+            
+                
+            
+
+            
+        
+        
+
+        
+        
+            
+                
+                    
+            
         
         
 
         if is_jump:
-            if keys[pygame.K_SPACE]:
-                is_jump = True
+            
             if jump_count >= -jump:
                 y -= (jump_count * abs(jump_count))
                 jump_count -= 2
@@ -171,37 +202,48 @@ def main():
                 is_jump = False
         
         
+
         if left:
-            if walk_count == 0:
-                win.blit(walk_left[0], (x, y))
-                
             
-            if walk_count == 1:
-                win.blit(walk_left[1], (x, y))
+            
+            if is_punch:
+                win.blit(left_punch, (x, y))  
+                
+                is_punch = False
+                
+                    
+
+            else:  
+                    
+                
+                
+                if walk_count == 0:
+                    win.blit(walk_left[0], (x, y))
+                    
+                
+                if walk_count == 1:
+                    win.blit(walk_left[1], (x, y))
+
+        
+        
                 
 
         if right:
-            if walk_count == 0:
-                win.blit(walk_right[0], (x, y))
+            if is_punch:
+                win.blit(right_punch, (x, y))
+                is_punch = False
                 
             
-            if walk_count == 1:
-                win.blit(walk_right[1], (x, y))
+            else:
+                if walk_count == 0:
+                    win.blit(walk_right[0], (x, y))
+                    
                 
+                if walk_count == 1:
+                    win.blit(walk_right[1], (x, y))
                 
-                
-                
-
-        
-
-        
+                        
         x += x_change
-        
-        
-        
-    
-
-        
         
         pygame.display.update()
 
