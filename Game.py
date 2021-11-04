@@ -1,9 +1,12 @@
 from os import truncate, walk
 import pygame
-from Character import character
-pygame.init()
+from Character import character, enemy
+import random
+
 from Windows import windows
 
+pygame.init()
+windows.caption
 
 def main():
     left = False
@@ -14,6 +17,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     char1 = character()
+    enemy1 = enemy()
 
     #PunchDelay
     punchTime = pygame.USEREVENT + 0
@@ -24,7 +28,8 @@ def main():
         
         clock.tick(20)
         windows.win.fill((255,255,255))
-
+        enemy1.draw_enemy()
+        
 
         keys = pygame.key.get_pressed()
 
@@ -55,8 +60,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            
-            
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -74,30 +77,43 @@ def main():
         if left:
             if is_punch:
                 char1.punch(0)
+                if char1.x <= enemy1.x + enemy1.w and enemy1.y >= char1.y:
+                    enemy1 = enemy(x=random.randint(100, windows.winWidth))
+                    enemy1.downfall()
                 
 
-                
-                
             else:
                 char1.left_walk(walk_count)
-            
+                if char1.x <= enemy1.x + enemy1.w and enemy1.y + enemy1.h >= char1.y + 10:
+                    if char1.x + char1.w  >= enemy1.x:
+
+                        exit()
 
         if right:
             if is_punch:
                 char1.punch(1)
-                
-                    
-                
+                if char1.x + char1.w +10 >= enemy1.x  and enemy1.y >= char1.y:
+                    enemy1 = enemy(x=random.randint(100, windows.winWidth))
+                    enemy1.downfall()
+            
+
+               
+   
             else:
                 char1.right_walk(walk_count)
+                if char1.x <= enemy1.x + enemy1.w and enemy1.y + enemy1.h >= char1.y + 10:
+                    if char1.x + char1.w >= enemy1.x and enemy1.y + enemy1.h >= char1.y + 10:
+
+                        exit()
+
         
         
         
         
-            
-            
-            
         
+        
+        
+        enemy1.downfall()
         pygame.display.update()
 
 
